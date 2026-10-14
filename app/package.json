@@ -1,0 +1,17 @@
+{
+  "name": "login-subagentes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Login construido por 3 subagentes: base de datos, backend y frontend",
+  "scripts": {
+    "db:init": "node --disable-warning=ExperimentalWarning db/init.js",
+    "db:ver": "node --disable-warning=ExperimentalWarning scripts/ver-db.js",
+    "backend": "node --disable-warning=ExperimentalWarning --env-file=.env backend/server.js",
+    "frontend": "node --env-file=.env scripts/servidor-frontend.js",
+    "start": "node backend/server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}

@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  login:
+    name: Pruebas del login (Node 24)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Pruebas de la API (db + backend)
+        run: npm test
+
+      - name: Configurar puertos de la demo
+        run: |
+          printf 'PORT=3001\nFRONT_PORT=5173\nAPI_URL=http://localhost:3001\n' > .env
+
+      - name: Inicializar base de datos
+        run: npm run db:init
+
+      - name: Smoke test del login contra el servidor real
+        run: |
+          npm run backend &
+          for i in $(seq 1 20); do
+            curl -sf http://localhost:3001/ >/dev/null && break
+            sleep 0.5
+          done
+          TOKEN=$(curl -sf -X POST http://localhost:3001/api/login \
+            -H 'Content-Type: application/json' \
+            -d '{"email":"demo@upb.edu","password":"Demo123!"}' | node -pe 'JSON.parse(require("fs").readFileSync(0)).token')
+          test -n "$TOKEN"
+          curl -sf http://localhost:3001/api/me -H "Authorization: Bearer $TOKEN"
+          CODE=$(curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:3001/api/login \
+            -H 'Content-Type: application/json' -d '{"email":"demo@upb.edu","password":"mala"}')
+          test "$CODE" = 401
