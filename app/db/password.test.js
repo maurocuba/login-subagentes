@@ -21,8 +21,10 @@ test('la misma contraseña produce hashes distintos (salt aleatorio)', () => {
   assert.notEqual(hashPassword('Demo123!'), hashPassword('Demo123!'));
 });
 
-// FALLA A PROPÓSITO: para ver una prueba en rojo en la pestaña Actions.
-// Un hash scrypt nunca es igual a la contraseña en texto plano, pero aquí se afirma lo contrario.
-test('[FALLO INTENCIONAL] el hash guardado es igual a la contraseña en texto plano', () => {
-  assert.equal(hashPassword('Demo123!'), 'Demo123!');
+// Corregido tras el bloqueo del hook verificar_push: antes afirmaba que el hash era IGUAL
+// al texto plano (a propósito, para verlo en rojo en Actions). Lo correcto es lo contrario.
+test('el hash guardado NO es igual a la contraseña en texto plano', () => {
+  const guardado = hashPassword('Demo123!');
+  assert.notEqual(guardado, 'Demo123!');
+  assert.ok(!guardado.includes('Demo123!'));
 });
