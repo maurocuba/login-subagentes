@@ -10,7 +10,7 @@ function ejecutarPruebas() {
     timeout: 50000,
   });
   const salida = (r.stdout || '') + (r.stderr || '');
-  const num = (nombre) => Number((salida.match(new RegExp(`${nombre} (\d+)`)) || [])[1] || 0);
+  const num = (nombre) => Number((salida.match(new RegExp(`${nombre} ([0-9]+)`)) || [])[1] || 0);
   return { ok: r.status === 0 && num('tests') > 0, salida, tests: num('tests'), pass: num('pass'), fail: num('fail') };
 }
 
